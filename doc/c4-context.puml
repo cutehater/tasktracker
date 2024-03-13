@@ -1,0 +1,18 @@
+@startuml Task tracker context
+
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Context.puml
+!define ICONURL https://raw.githubusercontent.com/tupadr3/plantuml-icon-font-sprites/v2.4.0
+!includeurl ICONURL/common.puml
+
+Person(user, "User", "Пользователь трекера задач")
+
+System(main, "Main client service", "Позволяет пользователям регистрироваться и авторизовываться в трекере, а также отвечает за клиентское API")
+System(tasks, "Tasks service", "Отвечает за задачи и комментарии к ним")
+System(statistics, "Statistics service", "Отвечает за подсёт числа лайков и просмотров к задачам")
+
+Rel(user, main, "Регистрируется и авторизовывается, создаёт, редактирует и просматривает задачи")
+Rel(main, tasks, "Получает информацию о задачах и комментариях")
+Rel(main, statistics, "Получает информацию о статистике лайков и просмотров")
+Rel(statistics, tasks, "Получает информацию о событиях с лайками и просмотрами")
+
+@enduml

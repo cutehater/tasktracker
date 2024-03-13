@@ -1,0 +1,35 @@
+@startuml Task tracker context
+
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+!define ICONURL https://raw.githubusercontent.com/tupadr3/plantuml-icon-font-sprites/v2.4.0
+!includeurl ICONURL/common.puml
+!define DEVICONS https://raw.githubusercontent.com/tupadr3/plantuml-icon-font-sprites/master/devicons
+!define DEVICONS2 https://raw.githubusercontent.com/tupadr3/plantuml-icon-font-sprites/master/devicons2
+!include DEVICONS/angular.puml
+!include DEVICONS/database.puml
+!include DEVICONS2/go.puml
+!include <cloudinsight/kafka>
+
+Person(user, "User", "Пользователь трекера задач")
+
+Container(main_front, "Main front", "Angular", "Фронтенд главного сервис для взаимодействия с клиентом", "angular")
+Container(main_back, "Main back", "Golang", "Бэкенд главного сервиса", "go")
+Container(tasks, "Tasks", "Golang", "Сервис задач", "go")
+Container(statistics, "Statistics", "Golang", "Сервис статистики", "go")
+Container(tasks_broker, "Tasks events", "kafka", "Брокер сообщений с событиями сервиса задач", "kafka")
+
+ContainerDb(main_db, "Main databatase", "Clickhouse", "Хранит информацию о пользователях, данные учётных записей", "database")
+ContainerDb(tasks_db, "Tasks databatase", "Clickhouse", "Хранит задачи и комментарии", "database")
+ContainerDb(statistics_db, "Statistics databatase", "Clickhouse", "Хранит статистику по лайкам и просмотрам", "database")
+
+Rel(user, main_front, "Регистрация, авторизация, работа с задачами")
+Rel(main_front, main_back, "Вызов методов", "REST")
+Rel(main_back, tasks, "Работа с задачами и комментариями", "gRPC")
+Rel(main_back, statistics, "Получение статистики лайков и просмотров", "gRPC")
+Rel(tasks, tasks_broker, "Пишет события")
+Rel(tasks_broker, statistics, "Читает события")
+Rel(main_back, main_db, "Сохраняет пользовательские данные")
+Rel(tasks, tasks_db, "Сохраняет задачи и комментарии")
+Rel(statistics, statistics_db, "Сохраняет статистику по лайкам и просмотрам")
+
+@enduml

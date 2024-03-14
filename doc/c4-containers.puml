@@ -18,7 +18,7 @@ Container(tasks, "Tasks", "Golang", "Сервис задач", "go")
 Container(statistics, "Statistics", "Golang", "Сервис статистики", "go")
 Container(tasks_broker, "Tasks events", "kafka", "Брокер сообщений с событиями сервиса задач", "kafka")
 
-ContainerDb(main_db, "Main databatase", "Clickhouse", "Хранит информацию о пользователях, данные учётных записей", "database")
+ContainerDb(main_db, "Main databatase", "Postgres", "Хранит информацию о пользователях, данные учётных записей", "database")
 ContainerDb(tasks_db, "Tasks databatase", "Clickhouse", "Хранит задачи и комментарии", "database")
 ContainerDb(statistics_db, "Statistics databatase", "Clickhouse", "Хранит статистику по лайкам и просмотрам", "database")
 

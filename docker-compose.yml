@@ -1,0 +1,27 @@
+version: "3"
+
+services:
+  db:
+    image: postgres:12.8
+    restart: always
+    environment:
+      - POSTGRES_USER=pg
+      - POSTGRES_PASSWORD=pass
+      - POSTGRES_DB=crud
+      - SECRET=FBJHFBKL89547395743FDJKHGD4854306734076403HFS87970
+    ports:
+      - "5432:5432"
+    volumes:
+      - db:/var/lib/postgresql/data
+  userservice:
+    container_name: userservice
+    build:
+      context: userservice
+    depends_on:
+      - db
+    links: 
+      - db
+
+volumes:
+  db:
+    driver: local

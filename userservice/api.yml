@@ -1,0 +1,121 @@
+openapi: 3.0.0
+info:
+  description: "Tasktracker API Documentation"
+  version: "1.0.0"
+  title: Tasktracker
+  contact:
+    email: kot8988@yandex.ru
+servers: []
+tags:
+  - name: user
+    description: Operations about user
+paths:
+  /user:
+    post:
+      tags:
+        - user
+      summary: Create user by login and password
+      operationId: CreateUser
+      requestBody:
+        required: true
+        description: A JSON object containing the login and password.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '201':
+          description: User was successfully created
+        '400':
+          description: Bad request
+        '409':
+          description: User already exists
+        '5XX':
+          description: Internal server error
+  /user/login:
+    post:
+      tags:
+        - user
+      summary: Log user into the system and returns auth cookie
+      operationId: LoginUser
+      requestBody:
+        required: true
+        description: A JSON object containing the login and password
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: >
+            Successfully authenticated.
+            The session ID is returned in a cookie named `JSESSIONID`. You need to include this cookie in subsequent requests.
+          headers: 
+            Set-Cookie:
+              schema: 
+                type: string
+        '400':
+          description: Invalid username/password supplied
+        '5XX':
+          description: Internal server error
+  '/user/{login}':
+    put:
+      tags:
+        - user
+      summary: Update user profile
+      description: Update existing user information ignoring empty fields
+      operationId: UpdateUser
+      parameters:
+        - name: login
+          in: path
+          description: user login
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: User info successfully updated
+        '400':
+          description: Invalid user data supplied
+        '401':
+          description: Access token is missing or invalid
+        '5XX':
+          description: Internal server error
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserData'
+        description: Updated user object
+        required: true
+      security:
+        - cookieAuth: []
+components:
+  schemas:
+    LoginRequest:
+      type: object
+      properties:
+        login:
+          type: string
+        password:
+          type: string
+    UserData:
+      type: object
+      properties:
+        firstName:
+          type: string
+        lastName:
+          type: string
+        birthDate:
+          type: string
+          format: date
+        email:
+          type: string
+          format: email
+        phone:
+          type: string
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: JSESSIONID

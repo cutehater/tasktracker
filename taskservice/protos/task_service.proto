@@ -1,0 +1,41 @@
+syntax = "proto3";
+
+option go_package = "/protos";
+
+import "google/protobuf/empty.proto";
+
+service TaskService {
+  rpc CreateTask(Task) returns (TaskCreds);
+  rpc UpdateTask(Task) returns (google.protobuf.Empty);
+  rpc DeleteTask(TaskCreds) returns (google.protobuf.Empty);
+  rpc GetTask(TaskCreds) returns (Task);
+  rpc GetTasksByPage(PageRequest) returns (PageResponse);
+}
+
+message Task {
+  int64 id = 1;
+  string owner = 2;
+  string body = 3;
+  Status status = 4;
+}
+
+message TaskCreds {
+  int64 id = 1;
+  string owner = 2;
+}
+
+message PageRequest {
+  int64 size = 1;
+  int64 number = 2;
+}
+
+message PageResponse {
+  repeated Task tasks = 1;
+}
+
+enum Status {
+  DEFAULT = 0;
+  OPEN = 1;
+  IN_PROGRESS = 2;
+  COMPLETED = 3;
+}

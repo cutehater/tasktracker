@@ -7,8 +7,8 @@ import (
 	"net/http"
 	"os"
 	"time"
-	"user_service/db"
-	"user_service/schemas"
+	"userservice/db"
+	"userservice/schemas"
 )
 
 var jwtKey = []byte("my_secret_key")

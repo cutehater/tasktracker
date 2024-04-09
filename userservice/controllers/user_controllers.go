@@ -1,28 +1,24 @@
 package controllers
 
 import (
-	"github.com/gin-gonic/gin"
-	"github.com/golang-jwt/jwt/v4"
-	"golang.org/x/crypto/bcrypt"
+	"log"
 	"net/http"
 	"os"
 	"time"
+
+	"github.com/gin-gonic/gin"
+	"github.com/golang-jwt/jwt/v4"
+	"golang.org/x/crypto/bcrypt"
+
 	"userservice/db"
 	"userservice/schemas"
 )
-
-var jwtKey = []byte("my_secret_key")
-var tokens []string
-
-type Claims struct {
-	Username string `json:"username"`
-	jwt.RegisteredClaims
-}
 
 func CreateUser(c *gin.Context) {
 	var loginReq schemas.LoginRequest
 
 	if err := c.BindJSON(&loginReq); err != nil {
+		log.Println("ERROR: invalid request body")
 		c.Status(http.StatusBadRequest)
 		return
 	}
@@ -31,12 +27,14 @@ func CreateUser(c *gin.Context) {
 	db.DB.First(&user, "login = ?", loginReq.Login)
 
 	if user.ID != 0 {
-		c.Status(http.StatusConflict) // User already exists
+		log.Println("ERROR: user already exists")
+		c.Status(http.StatusConflict)
 		return
 	}
 
 	hash, err := bcrypt.GenerateFromPassword([]byte(loginReq.Password), 10)
 	if err != nil {
+		log.Println(err)
 		c.Status(http.StatusInternalServerError)
 		return
 	}
@@ -44,6 +42,7 @@ func CreateUser(c *gin.Context) {
 	newUser := schemas.UserData{Login: loginReq.Login, PasswordHash: string(hash)}
 	res := db.DB.Create(&newUser)
 	if res.Error != nil {
+		log.Println(res.Error)
 		c.Status(http.StatusInternalServerError)
 	} else {
 		c.Status(http.StatusCreated)
@@ -54,6 +53,7 @@ func LoginUser(c *gin.Context) {
 	var loginReq schemas.LoginRequest
 
 	if err := c.BindJSON(&loginReq); err != nil {
+		log.Println("ERROR: invalid request body")
 		c.Status(http.StatusBadRequest)
 		return
 	}
@@ -62,13 +62,15 @@ func LoginUser(c *gin.Context) {
 	db.DB.First(&user, "login = ?", loginReq.Login)
 
 	if user.ID == 0 {
-		c.Status(http.StatusBadRequest) // No such user
+		log.Println("ERROR: user does not exist")
+		c.Status(http.StatusBadRequest)
 		return
 	}
 
 	err := bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(loginReq.Password))
 	if err != nil {
-		c.Status(http.StatusBadRequest) // Login or password incorrect
+		log.Println(err)
+		c.Status(http.StatusBadRequest)
 		return
 	}
 
@@ -79,6 +81,7 @@ func LoginUser(c *gin.Context) {
 	tokenString, err := token.SignedString([]byte(os.Getenv("SECRET")))
 
 	if err != nil {
+		log.Println(err)
 		c.Status(http.StatusInternalServerError)
 	} else {
 		c.SetCookie("JSESSIONID", tokenString, 3600*24, "", "", false, true)
@@ -87,16 +90,24 @@ func LoginUser(c *gin.Context) {
 
 func UpdateUser(c *gin.Context) {
 	login := c.Param("login")
+	if user, _ := c.Get("user"); user.(string) != login {
+		log.Println("ERROR: forbidden to change other users data")
+		c.Status(http.StatusForbidden)
+		return
+	}
+
 	var user schemas.UserData
 	db.DB.First(&user, "login = ?", login)
 
 	if user.ID == 0 {
-		c.Status(http.StatusInternalServerError) // User is authorized but not in db? Something strange
+		log.Println("ERROR: user does not exist")
+		c.Status(http.StatusInternalServerError)
 		return
 	}
 
 	var updateUser schemas.UserData
 	if err := c.BindJSON(&updateUser); err != nil {
+		log.Println("ERROR: invalid request body")
 		c.Status(http.StatusBadRequest)
 		return
 	}
@@ -106,6 +117,7 @@ func UpdateUser(c *gin.Context) {
 
 	res := db.DB.Model(&user).Updates(updateUser)
 	if res.Error != nil {
+		log.Println(res.Error)
 		c.Status(http.StatusInternalServerError)
 	} else {
 		c.Status(http.StatusOK)

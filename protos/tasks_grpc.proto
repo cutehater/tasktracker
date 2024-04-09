@@ -27,6 +27,7 @@ message TaskCreds {
 message PageRequest {
   int64 size = 1;
   int64 number = 2;
+  string owner = 3;
 }
 
 message PageResponse {

@@ -12,7 +12,7 @@ type LoginRequest struct {
 type UserData struct {
 	gorm.Model
 	Login        string `json:"login,omitempty"`
-	PasswordHash string `json:"password, omitempty"`
+	PasswordHash string `json:"password,omitempty"`
 	FirstName    string `json:"firstName,omitempty"`
 	LastName     string `json:"lastName,omitempty"`
 	BirthDate    string `json:"birthDate,omitempty"`

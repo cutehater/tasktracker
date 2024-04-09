@@ -1,7 +1,6 @@
 package db
 
 import (
-	"fmt"
 	"log"
 	"os"
 
@@ -14,14 +13,15 @@ import (
 var DB *gorm.DB
 var err error
 
-func ConnectToDb() {
-	user := os.Getenv("POSTGRES_USER")
-	password := os.Getenv("POSTGRES_PASSWORD")
-	db := os.Getenv("POSTGRES_DB")
+type Task struct {
+	gorm.Model
+	protos.Task
+}
 
-	dsn := fmt.Sprintf("postgres://%v:%v@localhost:5432/%v", user, password, db)
+func ConnectToDb() {
+	dsn := os.Getenv("DB_URL")
 	DB, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})
-	if err := DB.AutoMigrate(protos.Task{}); err != nil {
+	if err := DB.AutoMigrate(&Task{}); err != nil {
 		log.Fatal(err)
 	}
 

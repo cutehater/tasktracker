@@ -1,27 +1,44 @@
-version: "3"
-
 services:
-  db:
+  userservice_db:
+    container_name: userservice_db
     image: postgres:12.8
     restart: always
     environment:
-      - POSTGRES_USER=pg
       - POSTGRES_PASSWORD=pass
-      - POSTGRES_DB=crud
-      - SECRET=FBJHFBKL89547395743FDJKHGD4854306734076403HFS87970
-    ports:
-      - "5432:5432"
-    volumes:
-      - db:/var/lib/postgresql/data
+
   userservice:
     container_name: userservice
     build:
       context: userservice
+    ports:
+      - "8008:8008"
+    restart: always
+    environment:
+      - PORT=8008
+      - DB_URL=postgres://postgres:pass@userservice_db:5432/postgres
+      - SECRET=FBJHFBKL89547395743FDJKHGD4854306734076403HFS87970
     depends_on:
-      - db
-    links: 
-      - db
+      - userservice_db
+      - taskservice
+    links:
+      - taskservice
 
-volumes:
-  db:
-    driver: local
+  taskservice_db:
+    container_name: taskservice_db
+    image: postgres:12.8
+    restart: always
+    environment:
+      - POSTGRES_PASSWORD=pass
+
+  taskservice:
+    container_name: taskservice
+    build:
+      context: taskservice
+    ports:
+      - "50051:50051"
+    restart: always
+    environment:
+      - PORT=50051
+      - DB_URL=postgres://postgres:pass@taskservice_db:5432/postgres
+    depends_on:
+      - taskservice_db

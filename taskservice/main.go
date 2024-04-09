@@ -18,7 +18,7 @@ func main() {
 
 	protos.RegisterTaskServiceServer(server, &controllers.TaskServiceServer{})
 
-	listener, err := net.Listen("tcp", ":8009")
+	listener, err := net.Listen("tcp", ":50051")
 	if err != nil {
 		log.Fatalf("Failed to listen: %v", err)
 	}

@@ -5,6 +5,8 @@ services:
     restart: always
     environment:
       - POSTGRES_PASSWORD=pass
+    volumes:
+      - userservice_db_data:/var/lib/postgresql/data
 
   userservice:
     container_name: userservice
@@ -29,6 +31,8 @@ services:
     restart: always
     environment:
       - POSTGRES_PASSWORD=pass
+    volumes:
+      - taskservice_db_data:/var/lib/postgresql/data
 
   taskservice:
     container_name: taskservice
@@ -42,3 +46,7 @@ services:
       - DB_URL=postgres://postgres:pass@taskservice_db:5432/postgres
     depends_on:
       - taskservice_db
+
+volumes:
+  userservice_db_data:
+  taskservice_db_data:

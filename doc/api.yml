@@ -40,13 +40,19 @@ paths:
         - user
       summary: Log user into the system and returns auth cookie
       operationId: LoginUser
-      requestBody:
-        required: true
-        description: A JSON object containing the login and password
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/LoginRequest'
+      parameters:
+        - name: login
+          in: query
+          description: user login
+          required: true
+          schema:
+            type: string
+        - name: password
+          in: query
+          description: user password
+          required: true
+          schema:
+            type: string
       responses:
         '200':
           description: >
@@ -233,13 +239,19 @@ paths:
       summary: Get tasks with pagination
       description: Get tasks by page number and number of tasks in page
       operationId: GetTasksByPage
-      requestBody:
-        required: true
-        description: A JSON object containing page number and number of tasks in page.
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/PageRequest'
+      parameters:
+        - name: size
+          in: query
+          description: number of posts in page
+          required: true
+          schema:
+            type: integer
+        - name: number
+          in: query
+          description: page number
+          required: true
+          schema:
+            type: integer
       responses:
         '200':
           description: Successfuly get list of tasks

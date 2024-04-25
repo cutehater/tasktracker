@@ -83,14 +83,24 @@ func GetTask(c *gin.Context) {
 
 func GetTasksByPage(c *gin.Context) {
 	var pageReq protos.PageRequest
-	if err := c.BindJSON(&pageReq); err != nil {
-		log.Println("ERROR: invalid request body")
-		c.Status(http.StatusBadRequest)
-		return
-	}
 
 	taskOwner, _ := c.Get("user")
 	pageReq.Owner = taskOwner.(string)
+
+	size, err := strconv.Atoi(c.Query("size"))
+	if err != nil {
+		c.Status(http.StatusBadRequest)
+		return
+	}
+	pageReq.Size = int64(size)
+
+	number, err := strconv.Atoi(c.Query("number"))
+	if err != nil {
+		c.Status(http.StatusBadRequest)
+		return
+	}
+	pageReq.Number = int64(number)
+
 	resp, err := grpc.GRPCClient.GetTasksByPage(context.Background(), &pageReq)
 	returnResponse(c, resp, err, http.StatusOK)
 }

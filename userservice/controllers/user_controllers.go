@@ -50,16 +50,11 @@ func CreateUser(c *gin.Context) {
 }
 
 func LoginUser(c *gin.Context) {
-	var loginReq schemas.LoginRequest
-
-	if err := c.BindJSON(&loginReq); err != nil {
-		log.Println("ERROR: invalid request body")
-		c.Status(http.StatusBadRequest)
-		return
-	}
+	login := c.Query("login")
+	password := c.Query("password")
 
 	var user schemas.UserData
-	db.DB.First(&user, "login = ?", loginReq.Login)
+	db.DB.First(&user, "login = ?", login)
 
 	if user.ID == 0 {
 		log.Println("ERROR: user does not exist")
@@ -67,7 +62,7 @@ func LoginUser(c *gin.Context) {
 		return
 	}
 
-	err := bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(loginReq.Password))
+	err := bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(password))
 	if err != nil {
 		log.Println(err)
 		c.Status(http.StatusBadRequest)
@@ -75,7 +70,7 @@ func LoginUser(c *gin.Context) {
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"login": loginReq.Login,
+		"login": login,
 		"exp":   time.Now().Add(time.Hour * 24).Unix(),
 	})
 	tokenString, err := token.SignedString([]byte(os.Getenv("SECRET")))

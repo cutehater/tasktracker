@@ -84,8 +84,7 @@ func GetTask(c *gin.Context) {
 func GetTasksByPage(c *gin.Context) {
 	var pageReq protos.PageRequest
 
-	taskOwner, _ := c.Get("user")
-	pageReq.Owner = taskOwner.(string)
+	pageReq.Owner = c.Query("user")
 
 	size, err := strconv.Atoi(c.Query("size"))
 	if err != nil {

@@ -19,7 +19,7 @@ type TaskServiceServer struct {
 	protos.UnimplementedTaskServiceServer
 }
 
-func (s *TaskServiceServer) getTaskByIdAndOwner(id int64, owner string) (*db.Task, error) {
+func (s *TaskServiceServer) getTaskByIdAndOwner(id int64, owner string, needOwnerRights bool) (*db.Task, error) {
 	var existingTask *db.Task
 	if result := db.DB.First(&existingTask, id); result.Error != nil {
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
@@ -29,7 +29,7 @@ func (s *TaskServiceServer) getTaskByIdAndOwner(id int64, owner string) (*db.Tas
 		}
 	}
 
-	if owner != existingTask.Owner {
+	if needOwnerRights && owner != existingTask.Owner {
 		return nil, status.Error(codes.PermissionDenied, fmt.Sprintf("User %v is not owner of task %v", owner, id))
 	}
 
@@ -54,7 +54,7 @@ func (s *TaskServiceServer) CreateTask(ctx context.Context, req *protos.Task) (*
 }
 
 func (s *TaskServiceServer) UpdateTask(ctx context.Context, req *protos.Task) (*empty.Empty, error) {
-	if existingTask, err := s.getTaskByIdAndOwner(req.Id, req.Owner); err != nil {
+	if existingTask, err := s.getTaskByIdAndOwner(req.Id, req.Owner, true); err != nil {
 		return nil, err
 	} else {
 		if req.Body != "" {
@@ -73,7 +73,7 @@ func (s *TaskServiceServer) UpdateTask(ctx context.Context, req *protos.Task) (*
 }
 
 func (s *TaskServiceServer) DeleteTask(ctx context.Context, req *protos.TaskCreds) (*empty.Empty, error) {
-	if existingTask, err := s.getTaskByIdAndOwner(req.Id, req.Owner); err != nil {
+	if existingTask, err := s.getTaskByIdAndOwner(req.Id, req.Owner, true); err != nil {
 		return nil, err
 	} else {
 		if result := db.DB.Delete(existingTask); result.Error != nil {
@@ -85,7 +85,7 @@ func (s *TaskServiceServer) DeleteTask(ctx context.Context, req *protos.TaskCred
 }
 
 func (s *TaskServiceServer) GetTask(ctx context.Context, req *protos.TaskCreds) (*protos.Task, error) {
-	if existingTask, err := s.getTaskByIdAndOwner(req.Id, req.Owner); err != nil {
+	if existingTask, err := s.getTaskByIdAndOwner(req.Id, req.Owner, false); err != nil {
 		return nil, err
 	} else {
 		return &existingTask.Task, nil

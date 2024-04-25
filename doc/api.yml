@@ -240,6 +240,12 @@ paths:
       description: Get tasks by page number and number of tasks in page
       operationId: GetTasksByPage
       parameters:
+        - name: user
+          in: query
+          description: owner of posts to get
+          required: true
+          schema:
+            type: string
         - name: size
           in: query
           description: number of posts in page

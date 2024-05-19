@@ -27,5 +27,9 @@ func main() {
 	r.GET("/task/:id", middlewares.IsAuthorized, controllers.GetTask)
 	r.GET("/task/page", middlewares.IsAuthorized, controllers.GetTasksByPage)
 
+	// Like/View methods
+	r.POST("/like", middlewares.IsAuthorized)
+	r.POST("/view", middlewares.IsAuthorized)
+
 	r.Run()
 }

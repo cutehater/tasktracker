@@ -9,6 +9,16 @@ type LoginRequest struct {
 	Password string `json:"password"`
 }
 
+type Like struct {
+	TaskId int `json:"task_id"`
+	UserId int `json:"user_id"`
+}
+
+type View struct {
+	TaskId int `json:"task_id"`
+	UserId int `json:"user_id"`
+}
+
 type UserData struct {
 	gorm.Model
 	Login        string `json:"login,omitempty"`

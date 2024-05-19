@@ -70,8 +70,8 @@ func LoginUser(c *gin.Context) {
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"login": login,
-		"exp":   time.Now().Add(time.Hour * 24).Unix(),
+		"id":  user.ID,
+		"exp": time.Now().Add(time.Hour * 24).Unix(),
 	})
 	tokenString, err := token.SignedString([]byte(os.Getenv("SECRET")))
 
@@ -84,19 +84,19 @@ func LoginUser(c *gin.Context) {
 }
 
 func UpdateUser(c *gin.Context) {
-	login := c.Param("login")
-	if user, _ := c.Get("user"); user.(string) != login {
-		log.Println("ERROR: forbidden to change other users data")
-		c.Status(http.StatusForbidden)
+	currentUser, _ := c.Get("user")
+	var dbUser schemas.UserData
+	db.DB.First(&dbUser, currentUser.(uint))
+
+	if dbUser.ID == 0 {
+		log.Println("ERROR: user does not exist")
+		c.Status(http.StatusInternalServerError)
 		return
 	}
 
-	var user schemas.UserData
-	db.DB.First(&user, "login = ?", login)
-
-	if user.ID == 0 {
-		log.Println("ERROR: user does not exist")
-		c.Status(http.StatusInternalServerError)
+	if dbUser.Login != c.Param("login") {
+		log.Println("ERROR: forbidden to change other users data")
+		c.Status(http.StatusForbidden)
 		return
 	}
 
@@ -107,10 +107,10 @@ func UpdateUser(c *gin.Context) {
 		return
 	}
 
-	updateUser.Login = user.Login
-	updateUser.PasswordHash = user.PasswordHash
+	updateUser.Login = dbUser.Login
+	updateUser.PasswordHash = dbUser.PasswordHash
 
-	res := db.DB.Model(&user).Updates(updateUser)
+	res := db.DB.Model(&dbUser).Updates(updateUser)
 	if res.Error != nil {
 		log.Println(res.Error)
 		c.Status(http.StatusInternalServerError)

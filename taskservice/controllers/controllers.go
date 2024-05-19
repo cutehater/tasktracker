@@ -19,7 +19,7 @@ type TaskServiceServer struct {
 	protos.UnimplementedTaskServiceServer
 }
 
-func (s *TaskServiceServer) getTaskByIdAndOwner(id int64, owner string, needOwnerRights bool) (*db.Task, error) {
+func (s *TaskServiceServer) getTaskByIdAndOwner(id int64, owner int64, needOwnerRights bool) (*db.Task, error) {
 	var existingTask *db.Task
 	if result := db.DB.First(&existingTask, id); result.Error != nil {
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
@@ -29,7 +29,7 @@ func (s *TaskServiceServer) getTaskByIdAndOwner(id int64, owner string, needOwne
 		}
 	}
 
-	if needOwnerRights && owner != existingTask.Owner {
+	if needOwnerRights && owner != existingTask.OwnerId {
 		return nil, status.Error(codes.PermissionDenied, fmt.Sprintf("User %v is not owner of task %v", owner, id))
 	}
 
@@ -40,10 +40,10 @@ func (s *TaskServiceServer) CreateTask(ctx context.Context, req *protos.Task) (*
 	s.curTaskId++
 
 	task := &db.Task{Task: protos.Task{
-		Id:     s.curTaskId,
-		Owner:  req.Owner,
-		Body:   req.Body,
-		Status: req.Status,
+		Id:      s.curTaskId,
+		OwnerId: req.OwnerId,
+		Body:    req.Body,
+		Status:  req.Status,
 	}}
 
 	if result := db.DB.Create(task); result.Error != nil {
@@ -54,7 +54,7 @@ func (s *TaskServiceServer) CreateTask(ctx context.Context, req *protos.Task) (*
 }
 
 func (s *TaskServiceServer) UpdateTask(ctx context.Context, req *protos.Task) (*empty.Empty, error) {
-	if existingTask, err := s.getTaskByIdAndOwner(req.Id, req.Owner, true); err != nil {
+	if existingTask, err := s.getTaskByIdAndOwner(req.Id, req.OwnerId, true); err != nil {
 		return nil, err
 	} else {
 		if req.Body != "" {
@@ -73,7 +73,7 @@ func (s *TaskServiceServer) UpdateTask(ctx context.Context, req *protos.Task) (*
 }
 
 func (s *TaskServiceServer) DeleteTask(ctx context.Context, req *protos.TaskCreds) (*empty.Empty, error) {
-	if existingTask, err := s.getTaskByIdAndOwner(req.Id, req.Owner, true); err != nil {
+	if existingTask, err := s.getTaskByIdAndOwner(req.Id, req.OwnerId, true); err != nil {
 		return nil, err
 	} else {
 		if result := db.DB.Delete(existingTask); result.Error != nil {
@@ -85,7 +85,7 @@ func (s *TaskServiceServer) DeleteTask(ctx context.Context, req *protos.TaskCred
 }
 
 func (s *TaskServiceServer) GetTask(ctx context.Context, req *protos.TaskCreds) (*protos.Task, error) {
-	if existingTask, err := s.getTaskByIdAndOwner(req.Id, req.Owner, false); err != nil {
+	if existingTask, err := s.getTaskByIdAndOwner(req.Id, req.OwnerId, false); err != nil {
 		return nil, err
 	} else {
 		return &existingTask.Task, nil
@@ -96,7 +96,7 @@ func (s *TaskServiceServer) GetTasksByPage(ctx context.Context, req *protos.Page
 	offset := (req.Number - 1) * req.Size
 
 	var tasks []*db.Task
-	if result := db.DB.Where("owner = ?", req.Owner).Order("id DESC").Limit(int(req.Size)).Offset(int(offset)).Find(&tasks); result.Error != nil {
+	if result := db.DB.Where("owner = ?", req.OwnerId).Order("id DESC").Limit(int(req.Size)).Offset(int(offset)).Find(&tasks); result.Error != nil {
 		return nil, status.Error(codes.Internal, result.Error.Error())
 	}
 

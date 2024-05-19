@@ -33,7 +33,7 @@ func IsAuthorized(c *gin.Context) {
 			return
 		}
 
-		c.Set("user", claims["login"])
+		c.Set("user", claims["id"])
 		c.Next()
 	} else {
 		log.Println("ERROR: Cookie not found")

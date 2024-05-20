@@ -96,7 +96,7 @@ func (s *TaskServiceServer) GetTasksByPage(ctx context.Context, req *protos.Page
 	offset := (req.Number - 1) * req.Size
 
 	var tasks []*db.Task
-	if result := db.DB.Where("owner = ?", req.OwnerId).Order("id DESC").Limit(int(req.Size)).Offset(int(offset)).Find(&tasks); result.Error != nil {
+	if result := db.DB.Where("owner_id = ?", req.OwnerId).Order("id DESC").Limit(int(req.Size)).Offset(int(offset)).Find(&tasks); result.Error != nil {
 		return nil, status.Error(codes.Internal, result.Error.Error())
 	}
 

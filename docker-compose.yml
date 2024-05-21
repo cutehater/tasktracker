@@ -54,9 +54,6 @@ services:
   statisticsservice_db:
     container_name: statisticsservice_db
     image: yandex/clickhouse-server:latest
-    ports:
-      - "8123:8123"
-      - "9000:9000"
     volumes:
       - statisticsservice_db_data:/var/lib/clickhouse
     restart: always
@@ -70,9 +67,7 @@ services:
     restart: always
     environment:
       - PORT=8080
-      - CLICKHOUSE_DB=default
-      - CLICKHOUSE_HOST=clickhouse
-      - CLICKHOUSE_PORT=8123
+      - DB_URL=tcp://statisticsservice_db:9000?username=default&password=&database=default
       - KAFKA_BROKER=kafka:9092
       - KAFKA_TOPIC=events
     depends_on:

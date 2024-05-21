@@ -11,7 +11,6 @@ import (
 )
 
 var DB *gorm.DB
-var err error
 
 type Task struct {
 	gorm.Model
@@ -20,6 +19,7 @@ type Task struct {
 
 func ConnectToDb() {
 	dsn := os.Getenv("DB_URL")
+	var err error
 	DB, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err := DB.AutoMigrate(&Task{}); err != nil {
 		log.Fatal(err)

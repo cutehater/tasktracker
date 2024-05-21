@@ -7,6 +7,7 @@ import (
 
 	"github.com/IBM/sarama"
 
+	"statisticsservice/db"
 	"statisticsservice/schemas"
 )
 
@@ -18,7 +19,7 @@ func processMessage(msg *sarama.ConsumerMessage) {
 	if err := json.Unmarshal(msg.Value, &event); err != nil {
 		log.Printf("Failed to unmarshal event: %v\n", err)
 	}
-	log.Println(event)
+	db.AddEvent(event)
 }
 
 func RunConsumer() {

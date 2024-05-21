@@ -33,8 +33,8 @@ func ViewTask(c *gin.Context) {
 	}
 
 	event := schemas.Event{
-		TaskId:    taskId,
-		UserId:    userId,
+		TaskID:    taskId,
+		UserID:    userId,
 		EventType: schemas.View,
 	}
 
@@ -53,8 +53,8 @@ func LikeTask(c *gin.Context) {
 	}
 
 	event := schemas.Event{
-		TaskId:    taskId,
-		UserId:    userId,
+		TaskID:    taskId,
+		UserID:    userId,
 		EventType: schemas.Like,
 	}
 

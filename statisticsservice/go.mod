@@ -3,6 +3,7 @@ module statisticsservice
 go 1.20
 
 require (
+	github.com/ClickHouse/clickhouse-go v1.5.4
 	github.com/IBM/sarama v1.43.2
 	github.com/gin-gonic/gin v1.10.0
 )
@@ -10,6 +11,7 @@ require (
 require (
 	github.com/bytedance/sonic v1.11.6 // indirect
 	github.com/bytedance/sonic/loader v0.1.1 // indirect
+	github.com/cloudflare/golz4 v0.0.0-20150217214814-ef862a3cdc58 // indirect
 	github.com/cloudwego/base64x v0.1.4 // indirect
 	github.com/cloudwego/iasm v0.2.0 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect

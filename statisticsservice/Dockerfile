@@ -2,6 +2,7 @@ FROM golang:1.20-buster
 
 WORKDIR /statisticsservice/server
 
+COPY db/ db/
 COPY message_broker/ message_broker/
 COPY schemas/ schemas/
 COPY main.go main.go

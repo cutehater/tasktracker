@@ -1,7 +1,6 @@
 FROM golang:1.20-buster
 
-WORKDIR /userservice/server
-RUN mkdir controllers db protos
+WORKDIR /taskservice/server
 
 COPY controllers/ controllers/
 COPY db/ db/

@@ -1,11 +1,11 @@
 FROM golang:1.20-buster
 
 WORKDIR /userservice/server
-RUN mkdir controllers db middlewares schemas
 
 COPY controllers/ controllers/
 COPY db/ db/
 COPY grpc/ grpc/
+COPY message_broker/ message_broker/
 COPY middlewares/ middlewares/
 COPY protos/ protos/
 COPY schemas/ schemas/

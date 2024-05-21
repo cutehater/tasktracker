@@ -6,12 +6,14 @@ import (
 	"userservice/controllers"
 	"userservice/db"
 	"userservice/grpc"
+	"userservice/message_broker"
 	"userservice/middlewares"
 )
 
 func main() {
 	db.ConnectToDb()
 	grpc.CreateGRPCClient()
+	message_broker.InitMessageProducer()
 
 	r := gin.Default()
 
@@ -28,8 +30,8 @@ func main() {
 	r.GET("/task/page", middlewares.IsAuthorized, controllers.GetTasksByPage)
 
 	// Like/View methods
-	r.POST("/like", middlewares.IsAuthorized)
-	r.POST("/view", middlewares.IsAuthorized)
+	r.POST("/like", middlewares.IsAuthorized, controllers.LikeTask)
+	r.POST("/view", middlewares.IsAuthorized, controllers.ViewTask)
 
 	r.Run()
 }

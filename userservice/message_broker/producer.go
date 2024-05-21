@@ -41,6 +41,8 @@ func SendEventToBroker(event schemas.Event) error {
 	_, _, err = producer.SendMessage(msg)
 	if err != nil {
 		log.Printf("Failed to send message: %v", err)
+		return err
 	}
+
 	return nil
 }

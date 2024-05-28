@@ -7,33 +7,29 @@
 object User {
     id: int64
     login: string
-    password: string
-    task_ids: int64[]
+    password_hash: string
+    first_name: string
+    last_name: string
+    birth_date: string
+    email: string
+    phone: string
 }
 
 object Task {
     id: int64
-    admin_ids: int64[]
+    owner_id: int64
     body: string
     status: enum
 }
 
-object Comment {
-    task_id: int64
-    reply_to_id: int64/null
-    body: string
-}
-
-object LikeView {
+object Event {
     task_id: int64
     user_id: int64
     type: enum (like or view)
 }
 
 User }|..o{ Task
-Task ||..o{ Comment
-Task ||..o{ LikeView
-User ||..o{ Comment
-User ||..o{ LikeView
+Task ||..o{ Event
+User ||..o{ Event
 
 @enduml

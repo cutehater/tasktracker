@@ -14,20 +14,20 @@ service TaskService {
 
 message Task {
   int64 id = 1;
-  string owner = 2;
+  int64 ownerId = 2;
   string body = 3;
   Status status = 4;
 }
 
 message TaskCreds {
   int64 id = 1;
-  string owner = 2;
+  int64 ownerId = 2;
 }
 
 message PageRequest {
   int64 size = 1;
   int64 number = 2;
-  string owner = 3;
+  int64 ownerId = 3;
 }
 
 message PageResponse {

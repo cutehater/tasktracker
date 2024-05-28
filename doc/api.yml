@@ -11,6 +11,8 @@ tags:
     description: Operations about user
   - name: task
     description: Operations with tasks
+  - name: events
+    description: Operations with tasks events (views and likes)
 paths:
   /user:
     post:
@@ -240,6 +242,12 @@ paths:
       description: Get tasks by page number and number of tasks in page
       operationId: GetTasksByPage
       parameters:
+        - name: user
+          in: query
+          description: owner of posts to get
+          required: true
+          schema:
+            type: string
         - name: size
           in: query
           description: number of posts in page
@@ -267,7 +275,50 @@ paths:
           description: Internal server error
       security:
         - cookieAuth: []
-
+  /view:
+    post:
+      tags:
+        - events
+      summary: Add user view to task
+      description: Add one user view to task by task id and user id
+      operationId: ViewTask
+      parameters:
+        - name: task_id
+          in: query
+          description: task id to view
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Succesfully add user view to task
+        '400':
+          description: Invalid task id
+        '5XX':
+          description: Internal server error
+      security:
+        - cookieAuth: []
+  /like:
+    post:
+      tags:
+        - events
+      summary: Add user like to task
+      description: Add one user like to task by task id and user id
+      operationId: LikeTask
+      parameters:
+        - name: task_id
+          in: query
+          description: task id to like
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Succesfully add user like to task
+        '400':
+          description: Invalid task id
+        '5XX':
+          description: Internal server error
+      security:
+        - cookieAuth: []
 
 components:
   schemas:
@@ -319,17 +370,6 @@ components:
       type: object
       properties:
         message:
-          type: string
-    PageRequest:
-      type: object
-      properties:
-        size:
-          type: integer
-          format: int64
-        number:
-          type: integer
-          format: int64
-        owner:
           type: string
     PageResponse:
       type: object

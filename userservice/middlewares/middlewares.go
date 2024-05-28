@@ -12,6 +12,7 @@ import (
 
 func IsAuthorized(c *gin.Context) {
 	cookie, err := c.Cookie("JSESSIONID")
+
 	if err != nil {
 		log.Println("ERROR: invalid cookie header")
 		c.AbortWithStatus(http.StatusUnauthorized)
@@ -33,7 +34,7 @@ func IsAuthorized(c *gin.Context) {
 			return
 		}
 
-		c.Set("user", claims["login"])
+		c.Set("user", uint(claims["id"].(float64)))
 		c.Next()
 	} else {
 		log.Println("ERROR: Cookie not found")

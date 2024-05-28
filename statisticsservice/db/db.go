@@ -30,6 +30,7 @@ func ConnectToDb() {
         ) ENGINE = MergeTree()
         ORDER BY (task_id, user_id)
     `, tableName)
+	//
 
 	_, err = DB.Exec(schema)
 	if err != nil {

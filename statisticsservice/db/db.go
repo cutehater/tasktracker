@@ -12,7 +12,7 @@ import (
 )
 
 var DB *sql.DB
-var tableName = "events"
+var TableName = "events"
 
 func ConnectToDb() {
 	dsn := os.Getenv("DB_URL")
@@ -27,10 +27,9 @@ func ConnectToDb() {
             task_id      Int64,
             user_id      Int64,
             event_type   Enum8('View' = 0, 'Like' = 1)
-        ) ENGINE = MergeTree()
-        ORDER BY (task_id, user_id)
-    `, tableName)
-	//
+        ) ENGINE = ReplacingMergeTree()
+        ORDER BY (task_id, user_id, event_type)
+    `, TableName)
 
 	_, err = DB.Exec(schema)
 	if err != nil {
@@ -45,7 +44,7 @@ func AddEvent(event schemas.Event) {
 	}
 	defer tx.Rollback()
 
-	_, err = tx.Exec(fmt.Sprintf("INSERT INTO %s (task_id, user_id, event_type) VALUES (?, ?, ?)", tableName),
+	_, err = tx.Exec(fmt.Sprintf("INSERT INTO %s (task_id, user_id, event_type) VALUES (?, ?, ?) FINAL", TableName),
 		event.TaskID, event.UserID, int8(event.EventType))
 	if err != nil {
 		log.Printf("Error adding event: %v", err)
@@ -57,7 +56,7 @@ func AddEvent(event schemas.Event) {
 }
 
 func GetAllEvents() {
-	rows, err := DB.Query(fmt.Sprintf("SELECT task_id, user_id, CAST(event_type AS Int8) FROM %s", tableName))
+	rows, err := DB.Query(fmt.Sprintf("SELECT task_id, user_id, CAST(event_type AS Int8) FROM %s FINAL", TableName))
 	if err != nil {
 		log.Printf("Error getting events: %v", err)
 		return

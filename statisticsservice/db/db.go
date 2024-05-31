@@ -54,25 +54,3 @@ func AddEvent(event schemas.Event) {
 		log.Printf("Error adding event: %v", err)
 	}
 }
-
-func GetAllEvents() {
-	rows, err := DB.Query(fmt.Sprintf("SELECT task_id, username, CAST(event_type AS Int8) FROM %s FINAL", TableName))
-	if err != nil {
-		log.Printf("Error getting events: %v", err)
-		return
-	}
-	defer rows.Close()
-
-	for rows.Next() {
-		var event schemas.Event
-		if err := rows.Scan(&event.TaskID, &event.Username, &event.EventType); err != nil {
-			log.Printf("Error getting events: %v", err)
-			return
-		}
-		log.Printf("%+v\n", event)
-	}
-	if err := rows.Err(); err != nil {
-		log.Printf("Error getting events: %v", err)
-		return
-	}
-}

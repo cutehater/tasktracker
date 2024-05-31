@@ -32,6 +32,8 @@ func main() {
 	// Statistics methods
 	r.POST("/statistics", middlewares.IsAuthorized, controllers.ViewOrLikeTask)
 	r.GET("/statistics/:id", middlewares.IsAuthorized, controllers.GetSpecificTaskStatistics)
+	r.GET("/statistics/top_tasks", middlewares.IsAuthorized, controllers.GetTopTasks)
+	r.GET("/statistics/top_users", middlewares.IsAuthorized, controllers.GetTopUsers)
 
 	r.Run()
 }

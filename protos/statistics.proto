@@ -25,14 +25,12 @@ message TopRequest {
 message TaskResponse {
   int64 taskID = 1;
   string username = 2;
-  StatisticsType statisticsType = 3;
-  int64 statisticsCount = 4;
+  int64 count = 3;
 }
 
 message UserResponse {
   string username = 1;
-  StatisticsType statisticsType = 2;
-  int64 statisticsCount = 3;
+  int64 count = 2;
 }
 
 message TopTasksResponse {

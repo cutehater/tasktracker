@@ -3,16 +3,16 @@ syntax = "proto3";
 option go_package = "/protos";
 
 service StatisticsService {
-  rpc GetTotalViewsLikesCount(TotalCountRequest) returns (TotalCountResponse);
+  rpc GetSpecificTaskStatistics(SpecificTaskRequest) returns (SpecificTaskResponse);
   rpc GetTopTasks(TopRequest) returns (TopTasksResponse);
   rpc GetTopUsers(TopRequest) returns (TopUsersResponse);
 }
 
-message TotalCountRequest {
+message SpecificTaskRequest {
   int64 taskID = 1;
 }
 
-message TotalCountResponse {
+message SpecificTaskResponse {
   int64 taskID = 1;
   int64 viewsCount = 2;
   int64 likesCount = 3;
@@ -24,13 +24,13 @@ message TopRequest {
 
 message TaskResponse {
   int64 taskID = 1;
-  int64 userID = 2;
+  string username = 2;
   StatisticsType statisticsType = 3;
   int64 statisticsCount = 4;
 }
 
 message UserResponse {
-  int64 userID = 1;
+  string username = 1;
   StatisticsType statisticsType = 2;
   int64 statisticsCount = 3;
 }

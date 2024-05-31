@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"userservice/db"
 
 	"github.com/gin-gonic/gin"
 
@@ -14,39 +15,49 @@ import (
 	"userservice/schemas"
 )
 
-func getTaskAndUser(c *gin.Context) (taskId int64, userId int64) {
+func getTaskById(c *gin.Context) (taskId int64) {
 	taskId_, err := strconv.Atoi(c.Query("task_id"))
 	if err != nil || taskId_ <= 0 {
 		log.Println("ERROR: invalid task id")
 		c.Status(http.StatusBadRequest)
-		return 0, 0
+		return 0
 	}
 
 	taskId = int64(taskId_)
 	taskCreds := protos.TaskCreds{Id: taskId}
-	_, err = grpc.GRPCClient.GetTask(context.Background(), &taskCreds)
+	_, err = grpc.GRPCTaskServiceClient.GetTask(context.Background(), &taskCreds)
 	if err != nil {
 		log.Println("ERROR: invalid task id")
 		c.Status(http.StatusBadRequest)
-		return 0, 0
+		return 0
 	}
 
-	userId_, _ := c.Get("user")
-	userId = int64(userId_.(uint))
-
-	return
+	return taskId
 }
 
-func ViewTask(c *gin.Context) {
-	taskId, userId := getTaskAndUser(c)
+func ViewOrLikeTask(c *gin.Context) {
+	taskId := getTaskById(c)
 	if taskId == 0 {
 		return
 	}
 
+	currentUser, _ := c.Get("user")
+	var dbUser schemas.UserData
+	db.DB.First(&dbUser, currentUser.(uint))
+
 	event := schemas.Event{
-		TaskID:    taskId,
-		UserID:    userId,
-		EventType: schemas.View,
+		TaskID:   taskId,
+		Username: dbUser.Login,
+	}
+	eventType := c.Query("event_type")
+	if eventType == "view" {
+		event.EventType = schemas.View
+	} else if eventType == "like" {
+		event.EventType = schemas.Like
+	} else {
+		log.Println("ERROR: invalid event_type")
+		c.Status(http.StatusBadRequest)
+		return
 	}
 
 	err := message_broker.SendEventToBroker(event)
@@ -57,22 +68,17 @@ func ViewTask(c *gin.Context) {
 	}
 }
 
-func LikeTask(c *gin.Context) {
-	taskId, userId := getTaskAndUser(c)
+func GetSpecificTaskStatistics(c *gin.Context) {
+	taskId := getTaskById(c)
 	if taskId == 0 {
 		return
 	}
+	specificTaskReq := protos.SpecificTaskRequest{TaskID: taskId}
 
-	event := schemas.Event{
-		TaskID:    taskId,
-		UserID:    userId,
-		EventType: schemas.Like,
-	}
-
-	err := message_broker.SendEventToBroker(event)
+	statisticsServiceResp, err := grpc.GRPCStatisticsServiceClient.GetSpecificTaskStatistics(context.Background(), &specificTaskReq)
 	if err != nil {
 		c.Status(http.StatusInternalServerError)
 	} else {
-		c.Status(http.StatusOK)
+		c.JSON(http.StatusOK, statisticsServiceResp)
 	}
 }

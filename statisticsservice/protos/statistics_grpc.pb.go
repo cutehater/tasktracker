@@ -19,16 +19,16 @@ import (
 const _ = grpc.SupportPackageIsVersion7
 
 const (
-	StatisticsService_GetTotalViewsLikesCount_FullMethodName = "/StatisticsService/GetTotalViewsLikesCount"
-	StatisticsService_GetTopTasks_FullMethodName             = "/StatisticsService/GetTopTasks"
-	StatisticsService_GetTopUsers_FullMethodName             = "/StatisticsService/GetTopUsers"
+	StatisticsService_GetSpecificTaskStatistics_FullMethodName = "/StatisticsService/GetSpecificTaskStatistics"
+	StatisticsService_GetTopTasks_FullMethodName               = "/StatisticsService/GetTopTasks"
+	StatisticsService_GetTopUsers_FullMethodName               = "/StatisticsService/GetTopUsers"
 )
 
 // StatisticsServiceClient is the client API for StatisticsService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type StatisticsServiceClient interface {
-	GetTotalViewsLikesCount(ctx context.Context, in *TotalCountRequest, opts ...grpc.CallOption) (*TotalCountResponse, error)
+	GetSpecificTaskStatistics(ctx context.Context, in *SpecificTaskRequest, opts ...grpc.CallOption) (*SpecificTaskResponse, error)
 	GetTopTasks(ctx context.Context, in *TopRequest, opts ...grpc.CallOption) (*TopTasksResponse, error)
 	GetTopUsers(ctx context.Context, in *TopRequest, opts ...grpc.CallOption) (*TopUsersResponse, error)
 }
@@ -41,9 +41,9 @@ func NewStatisticsServiceClient(cc grpc.ClientConnInterface) StatisticsServiceCl
 	return &statisticsServiceClient{cc}
 }
 
-func (c *statisticsServiceClient) GetTotalViewsLikesCount(ctx context.Context, in *TotalCountRequest, opts ...grpc.CallOption) (*TotalCountResponse, error) {
-	out := new(TotalCountResponse)
-	err := c.cc.Invoke(ctx, StatisticsService_GetTotalViewsLikesCount_FullMethodName, in, out, opts...)
+func (c *statisticsServiceClient) GetSpecificTaskStatistics(ctx context.Context, in *SpecificTaskRequest, opts ...grpc.CallOption) (*SpecificTaskResponse, error) {
+	out := new(SpecificTaskResponse)
+	err := c.cc.Invoke(ctx, StatisticsService_GetSpecificTaskStatistics_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -72,7 +72,7 @@ func (c *statisticsServiceClient) GetTopUsers(ctx context.Context, in *TopReques
 // All implementations must embed UnimplementedStatisticsServiceServer
 // for forward compatibility
 type StatisticsServiceServer interface {
-	GetTotalViewsLikesCount(context.Context, *TotalCountRequest) (*TotalCountResponse, error)
+	GetSpecificTaskStatistics(context.Context, *SpecificTaskRequest) (*SpecificTaskResponse, error)
 	GetTopTasks(context.Context, *TopRequest) (*TopTasksResponse, error)
 	GetTopUsers(context.Context, *TopRequest) (*TopUsersResponse, error)
 	mustEmbedUnimplementedStatisticsServiceServer()
@@ -82,8 +82,8 @@ type StatisticsServiceServer interface {
 type UnimplementedStatisticsServiceServer struct {
 }
 
-func (UnimplementedStatisticsServiceServer) GetTotalViewsLikesCount(context.Context, *TotalCountRequest) (*TotalCountResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetTotalViewsLikesCount not implemented")
+func (UnimplementedStatisticsServiceServer) GetSpecificTaskStatistics(context.Context, *SpecificTaskRequest) (*SpecificTaskResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetSpecificTaskStatistics not implemented")
 }
 func (UnimplementedStatisticsServiceServer) GetTopTasks(context.Context, *TopRequest) (*TopTasksResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetTopTasks not implemented")
@@ -104,20 +104,20 @@ func RegisterStatisticsServiceServer(s grpc.ServiceRegistrar, srv StatisticsServ
 	s.RegisterService(&StatisticsService_ServiceDesc, srv)
 }
 
-func _StatisticsService_GetTotalViewsLikesCount_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(TotalCountRequest)
+func _StatisticsService_GetSpecificTaskStatistics_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SpecificTaskRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(StatisticsServiceServer).GetTotalViewsLikesCount(ctx, in)
+		return srv.(StatisticsServiceServer).GetSpecificTaskStatistics(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: StatisticsService_GetTotalViewsLikesCount_FullMethodName,
+		FullMethod: StatisticsService_GetSpecificTaskStatistics_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(StatisticsServiceServer).GetTotalViewsLikesCount(ctx, req.(*TotalCountRequest))
+		return srv.(StatisticsServiceServer).GetSpecificTaskStatistics(ctx, req.(*SpecificTaskRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -166,8 +166,8 @@ var StatisticsService_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*StatisticsServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "GetTotalViewsLikesCount",
-			Handler:    _StatisticsService_GetTotalViewsLikesCount_Handler,
+			MethodName: "GetSpecificTaskStatistics",
+			Handler:    _StatisticsService_GetSpecificTaskStatistics_Handler,
 		},
 		{
 			MethodName: "GetTopTasks",

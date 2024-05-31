@@ -18,7 +18,7 @@ const (
 
 type Event struct {
 	TaskID    int64     `json:"task_id"`
-	UserID    int64     `json:"user_id"`
+	Username  string    `json:"username"`
 	EventType EventType `json:"event_type"`
 }
 

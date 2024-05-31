@@ -3,6 +3,7 @@ package controllers
 import (
 	"context"
 	"fmt"
+
 	"statisticsservice/db"
 	"statisticsservice/protos"
 )
@@ -11,7 +12,7 @@ type StatisticsServiceServer struct {
 	protos.UnimplementedStatisticsServiceServer
 }
 
-func (s *StatisticsServiceServer) GetTotalViewsLikesCount(ctx context.Context, req *protos.TotalCountRequest) (*protos.TotalCountResponse, error) {
+func (s *StatisticsServiceServer) GetTotalViewsLikesCount(ctx context.Context, req *protos.SpecificTaskRequest) (*protos.SpecificTaskResponse, error) {
 	queryViews := fmt.Sprintf(`
         SELECT COUNT(*) AS views_count
         FROM %s
@@ -23,7 +24,7 @@ func (s *StatisticsServiceServer) GetTotalViewsLikesCount(ctx context.Context, r
         WHERE event_type = 'Like' AND task_id = ?
     `, db.TableName)
 
-	resp := protos.TotalCountResponse{TaskID: req.TaskID}
+	resp := protos.SpecificTaskResponse{TaskID: req.TaskID}
 
 	err := db.DB.QueryRow(queryViews, req.TaskID).Scan(&resp.ViewsCount)
 	if err != nil {
@@ -39,7 +40,7 @@ func (s *StatisticsServiceServer) GetTotalViewsLikesCount(ctx context.Context, r
 
 func (s *StatisticsServiceServer) GetTopTasks(ctx context.Context, req *protos.TopRequest) (*protos.TopTasksResponse, error) {
 	query := fmt.Sprintf(`
-        SELECT task_id, user_id, COUNT(*) AS count
+        SELECT task_id, username, COUNT(*) AS count
         FROM %s
         WHERE event_type = '%s'
         GROUP BY task_id
@@ -56,7 +57,7 @@ func (s *StatisticsServiceServer) GetTopTasks(ctx context.Context, req *protos.T
 	resp := protos.TopTasksResponse{}
 	for rows.Next() {
 		task := protos.TaskResponse{StatisticsType: req.Type}
-		if err := rows.Scan(&task.TaskID, &task.UserID, &task.StatisticsCount); err != nil {
+		if err := rows.Scan(&task.TaskID, &task.Username, &task.StatisticsCount); err != nil {
 			return nil, err
 		}
 		resp.Tasks = append(resp.Tasks, &task)
@@ -71,7 +72,7 @@ func (s *StatisticsServiceServer) GetTopTasks(ctx context.Context, req *protos.T
 
 func (s *StatisticsServiceServer) GetTopUsers(ctx context.Context, req *protos.TopRequest) (*protos.TopUsersResponse, error) {
 	query := fmt.Sprintf(`
-        SELECT user_id, COUNT(*) AS count
+        SELECT username, COUNT(*) AS count
         FROM %s
         WHERE event_type = '%s'
         GROUP BY user_id
@@ -88,7 +89,7 @@ func (s *StatisticsServiceServer) GetTopUsers(ctx context.Context, req *protos.T
 	resp := protos.TopUsersResponse{}
 	for rows.Next() {
 		user := protos.UserResponse{StatisticsType: req.Type}
-		if err := rows.Scan(&user.UserID, &user.StatisticsCount); err != nil {
+		if err := rows.Scan(&user.Username, &user.StatisticsCount); err != nil {
 			return nil, err
 		}
 		resp.Users = append(resp.Users, &user)

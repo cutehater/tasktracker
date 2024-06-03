@@ -29,9 +29,8 @@ message TaskResponse {
 }
 
 message UserResponse {
-  int64 userID = 1;
-  string ownerUsername = 2;
-  int64 count = 3;
+  string ownerUsername = 1;
+  int64 count = 2;
 }
 
 message TopTasksResponse {

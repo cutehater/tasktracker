@@ -11,8 +11,8 @@ tags:
     description: Operations about user
   - name: task
     description: Operations with tasks
-  - name: events
-    description: Operations with tasks events (views and likes)
+  - name: statistics
+    description: Operations with tasks statistics (views and likes)
 paths:
   /user:
     post:
@@ -158,10 +158,6 @@ paths:
       responses:
         '200':
           description: Task successfully updated
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Empty'
         '400':
           description: Invalid task data supplied
         '401':
@@ -189,10 +185,6 @@ paths:
       responses:
         '200':
           description: Task successfully deleted
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Empty'
         '400':
           description: Task with such id not exists
         '401':
@@ -275,50 +267,109 @@ paths:
           description: Internal server error
       security:
         - cookieAuth: []
-  /view:
-    post:
+  /statistics/{id}:
+    get:
       tags:
-        - events
-      summary: Add user view to task
-      description: Add one user view to task by task id and user id
-      operationId: ViewTask
+        - statistics
+      summary: Get task statistics
+      description: Get views and likes count of specific task
+      operationId: GetSpecificTaskStatistics
       parameters:
-        - name: task_id
-          in: query
-          description: task id to view
+        - name: id
+          in: path
+          description: task id to get statistics
+          required: true
           schema:
             type: integer
       responses:
         '200':
-          description: Succesfully add user view to task
+          description: Succesfully get task statistics
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SpecificTaskResponse'
         '400':
           description: Invalid task id
         '5XX':
           description: Internal server error
       security:
         - cookieAuth: []
-  /like:
     post:
       tags:
-        - events
-      summary: Add user like to task
-      description: Add one user like to task by task id and user id
-      operationId: LikeTask
+        - statistics
+      summary: Send user view/like to task
+      description: Send one user view/like to task by task id and user id
+      operationId: ViewOrLikeTask
       parameters:
-        - name: task_id
-          in: query
-          description: task id to like
+        - name: id
+          in: path
+          description: task id to send view/like
+          required: true
           schema:
             type: integer
+        - name: event_type
+          in: query
+          description: event type (view or like)
+          required: true
+          schema:
+            $ref: '#/components/schemas/EventType'
       responses:
         '200':
-          description: Succesfully add user like to task
+          description: Succesfully send user view/like to task
         '400':
-          description: Invalid task id
+          description: Invalid task id or event type
         '5XX':
           description: Internal server error
       security:
         - cookieAuth: []
+  /statistics/top_tasks:
+    get:
+      tags:
+        - statistics
+      summary: Get top-5 tasks by views or likes
+      description: Get top-5 tasks (task id, owner username, count of views/likes) by views or likes
+      operationId: GetTopTasks
+      parameters:
+        - name: order_by
+          in: query
+          description: order for top tasks (by views or by likes)
+          schema:
+            $ref: '#/components/schemas/EventType'
+      responses:
+        '200':
+          description: Succesfully get top tasks
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TopTasksResponse'
+        '400':
+          description: Invalid order by
+        '5XX':
+          description: Internal server error
+  /statistics/top_users:
+    get:
+      tags:
+        - statistics
+      summary: Get top-3 users by views or likes
+      description: Get top-3 users (username, count of views/likes) by views or likes
+      operationId: GetTopUsers
+      parameters:
+        - name: order_by
+          in: query
+          description: order for top users (by views or by likes)
+          schema:
+            $ref: '#/components/schemas/EventType'
+      responses:
+        '200':
+          description: Succesfully get top users
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TopUsersResponse'
+        '400':
+          description: Invalid order by
+        '5XX':
+          description: Internal server error
 
 components:
   schemas:
@@ -350,8 +401,9 @@ components:
         id:
           type: integer
           format: int64
-        owner:
-          type: string
+        ownerID:
+          type: integer
+          format: int64
         body:
           type: string
         status:
@@ -366,11 +418,6 @@ components:
           format: int64
         owner:
           type: string
-    Empty:
-      type: object
-      properties:
-        message:
-          type: string
     PageResponse:
       type: object
       properties:
@@ -378,6 +425,55 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Task'
+    EventType:
+      type: string
+      enum: [View, Like]
+      default: View
+    SpecificTaskResponse:
+      type: object
+      properties:
+        taskID:
+          type: integer
+          format: int64
+        viewsCount:
+          type: integer
+          format: int64
+        likesCount:
+          type: integer
+          format: int64
+    TaskResponse:
+      type: object
+      properties:
+        taskID:
+          type: integer
+          format: int64
+        ownerUsername:
+          type: string
+        count:
+          type: integer
+          format: int64
+    TopTasksResponse:
+      type: object
+      properties:
+        tasks:
+          type: array
+          items:
+            $ref: '#/components/schemas/TaskResponse'
+    UserResponse:
+      type: object
+      properties:
+        ownerUsername:
+          type: string
+        count:
+          type: integer
+          format: int64
+    TopUsersResponse:
+      type: object
+      properties:
+        users:
+          type: array
+          items:
+            $ref: '#/components/schemas/UserResponse'
 
   securitySchemes:
     cookieAuth:

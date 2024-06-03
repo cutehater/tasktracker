@@ -19,9 +19,9 @@ func CreateGRPCClients() {
 	}
 	GRPCTaskServiceClient = protos.NewTaskServiceClient(conn)
 
-	conn, err = grpc.Dial("STATISTICS_SERVICE_ADDR", grpc.WithInsecure())
+	conn, err = grpc.Dial(os.Getenv("STATISTICS_SERVICE_ADDR"), grpc.WithInsecure())
 	if err != nil {
 		log.Fatal(err)
 	}
-	GRPCTaskServiceClient = protos.NewTaskServiceClient(conn)
+	GRPCStatisticsServiceClient = protos.NewStatisticsServiceClient(conn)
 }

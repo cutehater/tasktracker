@@ -17,39 +17,54 @@ import (
 	"userservice/schemas"
 )
 
-func getTaskById(c *gin.Context) (taskId int64) {
-	taskId_, err := strconv.Atoi(c.Query("task_id"))
+func getTaskByID(c *gin.Context) (taskID int64, ownerID int64, err error) {
+	taskId_, err := strconv.Atoi(c.Param("id"))
 	if err != nil || taskId_ <= 0 {
-		log.Println("ERROR: invalid task id")
-		c.Status(http.StatusBadRequest)
-		return 0
+		return 0, 0, errors.New("invalid task id")
 	}
 
-	taskId = int64(taskId_)
-	taskCreds := protos.TaskCreds{Id: taskId}
-	_, err = grpc.GRPCTaskServiceClient.GetTask(context.Background(), &taskCreds)
+	taskID = int64(taskId_)
+	taskCreds := protos.TaskCreds{Id: taskID}
+	resp, err := grpc.GRPCTaskServiceClient.GetTask(context.Background(), &taskCreds)
 	if err != nil {
-		log.Println("ERROR: invalid task id")
-		c.Status(http.StatusBadRequest)
-		return 0
+		return 0, 0, errors.New("invalid task creds")
 	}
+	ownerID = resp.OwnerId
 
-	return taskId
+	return
+}
+
+func getUsernameByUserID(userID int64) (username string, err error) {
+	var dbUser schemas.UserData
+	db.DB.First(&dbUser, uint(userID))
+	if dbUser.ID == 0 {
+		return "", errors.New("user not found")
+	} else {
+		return dbUser.Login, nil
+	}
 }
 
 func ViewOrLikeTask(c *gin.Context) {
-	taskId := getTaskById(c)
-	if taskId == 0 {
+	taskId, ownerID, err := getTaskByID(c)
+	if err != nil {
+		c.Status(http.StatusBadRequest)
+		log.Println(err.Error())
 		return
 	}
 
-	currentUser, _ := c.Get("user")
-	var dbUser schemas.UserData
-	db.DB.First(&dbUser, currentUser.(uint))
+	userID, _ := c.Get("user")
+
+	ownerUsername, err := getUsernameByUserID(ownerID)
+	if err != nil {
+		log.Println(err.Error())
+		c.Status(http.StatusInternalServerError)
+		return
+	}
 
 	event := schemas.Event{
-		TaskID:   taskId,
-		Username: dbUser.Login,
+		TaskID:        taskId,
+		UserID:        int64(userID.(uint)),
+		OwnerUsername: ownerUsername,
 	}
 	eventType := c.Query("event_type")
 	if eventType == "view" {
@@ -62,7 +77,7 @@ func ViewOrLikeTask(c *gin.Context) {
 		return
 	}
 
-	err := message_broker.SendEventToBroker(event)
+	err = message_broker.SendEventToBroker(event)
 	if err != nil {
 		c.Status(http.StatusInternalServerError)
 	} else {
@@ -71,9 +86,13 @@ func ViewOrLikeTask(c *gin.Context) {
 }
 
 func GetSpecificTaskStatistics(c *gin.Context) {
-	taskId := getTaskById(c)
+	taskId, _, err := getTaskByID(c)
 	if taskId == 0 {
-		return
+		if err != nil {
+			c.Status(http.StatusBadRequest)
+			log.Println(err.Error())
+			return
+		}
 	}
 	req := protos.SpecificTaskRequest{TaskID: taskId}
 
@@ -86,7 +105,7 @@ func GetSpecificTaskStatistics(c *gin.Context) {
 }
 
 func getOrderBy(c *gin.Context) (protos.StatisticsType, error) {
-	orderBy := c.Query("")
+	orderBy := c.Query("order_by")
 	if len(orderBy) == 0 {
 		orderBy = "view"
 	}
@@ -111,10 +130,12 @@ func GetTopTasks(c *gin.Context) {
 
 	resp, err := grpc.GRPCStatisticsServiceClient.GetTopTasks(context.Background(), &req)
 	if err != nil {
+		log.Println(err.Error())
 		c.Status(http.StatusInternalServerError)
-	} else {
-		c.JSON(http.StatusOK, resp)
+		return
 	}
+
+	c.JSON(http.StatusOK, resp)
 }
 
 func GetTopUsers(c *gin.Context) {
@@ -126,8 +147,10 @@ func GetTopUsers(c *gin.Context) {
 
 	resp, err := grpc.GRPCStatisticsServiceClient.GetTopUsers(context.Background(), &req)
 	if err != nil {
+		log.Println(err.Error())
 		c.Status(http.StatusInternalServerError)
-	} else {
-		c.JSON(http.StatusOK, resp)
+		return
 	}
+
+	c.JSON(http.StatusOK, resp)
 }

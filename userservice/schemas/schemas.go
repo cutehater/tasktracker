@@ -17,9 +17,10 @@ const (
 )
 
 type Event struct {
-	TaskID    int64     `json:"task_id"`
-	Username  string    `json:"username"`
-	EventType EventType `json:"event_type"`
+	TaskID        int64     `json:"task_id"`
+	UserID        int64     `json:"user_id"`
+	OwnerUsername string    `json:"owner_username"`
+	EventType     EventType `json:"event_type"`
 }
 
 type UserData struct {
@@ -31,4 +32,15 @@ type UserData struct {
 	BirthDate    string `json:"birthDate,omitempty"`
 	Email        string `json:"email,omitempty"`
 	Phone        string `json:"phone,omitempty"`
+}
+
+type TopTaskResponse struct {
+	TaskID   int64  `json:"task_id"`
+	Username string `json:"username"`
+	Count    int64  `json:"count"`
+}
+
+type TopUserResponse struct {
+	Username string `json:"username"`
+	Count    int64  `json:"count"`
 }

@@ -24,11 +24,12 @@ func ConnectToDb() {
 
 	schema := fmt.Sprintf(`
         CREATE TABLE IF NOT EXISTS %s (
-            task_id      Int64,
-            username      String,
-            event_type   Enum8('View' = 0, 'Like' = 1)
+            task_id        Int64,
+            user_id        Int64,
+            owner_username String,
+            event_type     Enum8('View' = 0, 'Like' = 1)
         ) ENGINE = ReplacingMergeTree()
-        ORDER BY (task_id, username, event_type)
+        ORDER BY (task_id, user_id, event_type)
     `, TableName)
 
 	_, err = DB.Exec(schema)
@@ -44,8 +45,13 @@ func AddEvent(event schemas.Event) {
 	}
 	defer tx.Rollback()
 
-	_, err = tx.Exec(fmt.Sprintf("INSERT INTO %s (task_id, username, event_type) VALUES (?, ?, ?) FINAL", TableName),
-		event.TaskID, event.Username, int8(event.EventType))
+	_, err = tx.Exec(fmt.Sprintf(`
+	INSERT INTO %s
+	(task_id, user_id, owner_username, event_type)
+	VALUES (?, ?, ?, ?)
+	FINAL
+	`, TableName),
+		event.TaskID, event.UserID, event.OwnerUsername, int8(event.EventType))
 	if err != nil {
 		log.Printf("Error adding event: %v", err)
 	}

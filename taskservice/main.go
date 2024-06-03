@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"net"
+	"os"
 
 	"google.golang.org/grpc"
 
@@ -18,7 +19,7 @@ func main() {
 
 	protos.RegisterTaskServiceServer(server, &controllers.TaskServiceServer{})
 
-	listener, err := net.Listen("tcp", ":50051")
+	listener, err := net.Listen("tcp", ":"+os.Getenv("PORT"))
 	if err != nil {
 		log.Fatalf("Failed to listen: %v", err)
 	}

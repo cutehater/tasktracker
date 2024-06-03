@@ -5,15 +5,15 @@ import (
 	"log"
 	"net/http"
 	"strconv"
-	"userservice/db"
-	"userservice/schemas"
 
 	"github.com/gin-gonic/gin"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
+	"userservice/db"
 	"userservice/grpc"
 	"userservice/protos"
+	"userservice/schemas"
 )
 
 func returnResponse(c *gin.Context, resp any, err error, okStatus int) {
@@ -22,7 +22,7 @@ func returnResponse(c *gin.Context, resp any, err error, okStatus int) {
 			log.Println("ERROR: owner mismatch")
 			c.Status(http.StatusForbidden)
 		} else if status.Code(err) == codes.NotFound {
-			log.Println("ERROR: task not found")
+			log.Println("ERROR: task or user not found")
 			c.Status(http.StatusBadRequest)
 		} else {
 			log.Println("ERROR: internal database error")
@@ -43,7 +43,7 @@ func CreateTask(c *gin.Context) {
 
 	taskOwner, _ := c.Get("user")
 	task.OwnerId = int64(taskOwner.(uint))
-	resp, err := grpc.GRPCClient.CreateTask(context.Background(), &task)
+	resp, err := grpc.GRPCTaskServiceClient.CreateTask(context.Background(), &task)
 	returnResponse(c, resp, err, http.StatusCreated)
 }
 
@@ -59,7 +59,7 @@ func UpdateTask(c *gin.Context) {
 	task.OwnerId = int64(taskOwner.(uint))
 	id, _ := strconv.Atoi(c.Param("id"))
 	task.Id = int64(id)
-	resp, err := grpc.GRPCClient.UpdateTask(context.Background(), &task)
+	resp, err := grpc.GRPCTaskServiceClient.UpdateTask(context.Background(), &task)
 	returnResponse(c, resp, err, http.StatusOK)
 }
 
@@ -69,7 +69,7 @@ func DeleteTask(c *gin.Context) {
 	taskCreds.OwnerId = int64(taskOwner.(uint))
 	id, _ := strconv.Atoi(c.Param("id"))
 	taskCreds.Id = int64(id)
-	resp, err := grpc.GRPCClient.DeleteTask(context.Background(), &taskCreds)
+	resp, err := grpc.GRPCTaskServiceClient.DeleteTask(context.Background(), &taskCreds)
 	returnResponse(c, resp, err, http.StatusOK)
 }
 
@@ -79,7 +79,7 @@ func GetTask(c *gin.Context) {
 	taskCreds.OwnerId = int64(taskOwner.(uint))
 	id, _ := strconv.Atoi(c.Param("id"))
 	taskCreds.Id = int64(id)
-	resp, err := grpc.GRPCClient.GetTask(context.Background(), &taskCreds)
+	resp, err := grpc.GRPCTaskServiceClient.GetTask(context.Background(), &taskCreds)
 	returnResponse(c, resp, err, http.StatusOK)
 }
 
@@ -109,6 +109,6 @@ func GetTasksByPage(c *gin.Context) {
 	}
 	pageReq.Number = int64(number)
 
-	resp, err := grpc.GRPCClient.GetTasksByPage(context.Background(), &pageReq)
+	resp, err := grpc.GRPCTaskServiceClient.GetTasksByPage(context.Background(), &pageReq)
 	returnResponse(c, resp, err, http.StatusOK)
 }

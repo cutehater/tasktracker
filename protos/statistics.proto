@@ -1,0 +1,47 @@
+syntax = "proto3";
+
+option go_package = "/protos";
+
+service StatisticsService {
+  rpc GetSpecificTaskStatistics(SpecificTaskRequest) returns (SpecificTaskResponse);
+  rpc GetTopTasks(TopRequest) returns (TopTasksResponse);
+  rpc GetTopUsers(TopRequest) returns (TopUsersResponse);
+}
+
+message SpecificTaskRequest {
+  int64 taskID = 1;
+}
+
+message SpecificTaskResponse {
+  int64 taskID = 1;
+  int64 viewsCount = 2;
+  int64 likesCount = 3;
+}
+
+message TopRequest {
+  StatisticsType type = 1;
+}
+
+message TaskResponse {
+  int64 taskID = 1;
+  string ownerUsername = 2;
+  int64 count = 3;
+}
+
+message UserResponse {
+  string ownerUsername = 1;
+  int64 count = 2;
+}
+
+message TopTasksResponse {
+  repeated TaskResponse tasks = 1;
+}
+
+message TopUsersResponse {
+  repeated UserResponse users = 1;
+}
+
+enum StatisticsType {
+  View = 0;
+  Like = 1;
+}

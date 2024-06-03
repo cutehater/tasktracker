@@ -17,6 +17,8 @@ services:
     restart: always
     environment:
       - PORT=8008
+      - TASK_SERVICE_ADDR=taskservice:50051
+      - STATISTICS_SERVICE_ADDR=statisticsservice:8080
       - DB_URL=postgres://postgres:pass@userservice_db:5432/postgres
       - SECRET=FBJHFBKL89547395743FDJKHGD4854306734076403HFS87970
       - KAFKA_BROKER=kafka:9092
@@ -42,8 +44,6 @@ services:
     container_name: taskservice
     build:
       context: taskservice
-    ports:
-      - "50051:50051"
     restart: always
     environment:
       - PORT=50051
@@ -62,8 +62,6 @@ services:
     container_name: statisticsservice
     build:
       context: statisticsservice
-    ports:
-      - "8080:8080"
     restart: always
     environment:
       - PORT=8080

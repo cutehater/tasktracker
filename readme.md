@@ -28,7 +28,7 @@ TaskTracker — распределённый reliable трекер задач, �
 ├── doc/                       # Документация проекта (API, ER и C4-диаграммы)
 ├── protos/                    # gRPC/Protobuf файлы
 ├── userservice/               # Сервис для работы с пользователями
-├── taskservice/               # Сервис для работы с задачами задачами
+├── taskservice/               # Сервис для работы с задачами
 ├── statisticsservice/         # Сервис статистики
 ├── docker-compose.yml         
 ├── readme.md

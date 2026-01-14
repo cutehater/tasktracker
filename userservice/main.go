@@ -12,7 +12,7 @@ import (
 
 func main() {
 	db.ConnectToDb()
-	grpc.CreateGRPCClient()
+	grpc.CreateGRPCClients()
 	message_broker.InitMessageProducer()
 
 	r := gin.Default()
@@ -29,9 +29,11 @@ func main() {
 	r.GET("/task/:id", middlewares.IsAuthorized, controllers.GetTask)
 	r.GET("/task/page", middlewares.IsAuthorized, controllers.GetTasksByPage)
 
-	// Like/View methods
-	r.POST("/like", middlewares.IsAuthorized, controllers.LikeTask)
-	r.POST("/view", middlewares.IsAuthorized, controllers.ViewTask)
+	// Statistics methods
+	r.POST("/statistics/:id", middlewares.IsAuthorized, controllers.ViewOrLikeTask)
+	r.GET("/statistics/:id", middlewares.IsAuthorized, controllers.GetSpecificTaskStatistics)
+	r.GET("/statistics/top_tasks", middlewares.IsAuthorized, controllers.GetTopTasks)
+	r.GET("/statistics/top_users", middlewares.IsAuthorized, controllers.GetTopUsers)
 
 	r.Run()
 }

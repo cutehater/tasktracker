@@ -25,6 +25,7 @@ object Task {
 object Event {
     task_id: int64
     user_id: int64
+    owner_username: string
     type: enum (like or view)
 }
 
